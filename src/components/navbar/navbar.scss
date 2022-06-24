@@ -1,0 +1,80 @@
+.navbar{
+    /* flex: 1; */
+    flex-basis:250px; /*navbar 넓이*/
+    height: calc(100vh-50px);
+    background-color: #17171B;
+    position: sticky;
+    top:50px;
+}
+
+.navbarWrapper{
+    padding: 20px;
+    color: #555;
+}
+
+.navbarMenu{
+    margin-bottom: 2rem;
+}
+
+.navbarTitle{
+    font-size:1em;
+    color: rgb(197,197,197);
+}
+
+.navbarList{
+    list-style: none;
+    padding-left: 0.3rem;
+}
+
+.navbarListItem {
+    
+    text-decoration: none;
+    color: inherit;
+
+    li{
+        margin: 4px;
+        padding: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        border-radius: 10px;
+        
+        &:hover{
+            background-color: rgb(212,209,235);
+            color:#17171B
+        }
+        
+    }
+
+}
+
+.navbarListItemActive {
+    
+    text-decoration: none;
+    color: inherit;
+
+    li{
+        margin: 4px;
+        padding: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        border-radius: 10px;
+        background-color: rgb(212,209,235);
+        color:#17171B
+    }
+
+    
+
+}
+
+
+.navbarIcon{
+    margin-right: 10px;
+    font-size: 20px !important;
+}
+
+.link{
+    text-decoration: none;
+    color: inherit;
+}

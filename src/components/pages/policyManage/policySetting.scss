@@ -1,0 +1,103 @@
+@import "../../../scss/common.scss";
+
+.policySetting{
+    flex:4;
+}
+
+.policySettingWrap{
+    display: flex;
+
+    &.center{
+        justify-items: center;
+        align-items: center;
+    }
+}
+
+.policySettingSaveButton{
+    @include button-color(#3bb077);
+    padding: 7px 15px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.policySettingTop{
+        // width: 350px;
+    // flex: 1;
+    background-color: #202026;
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 1px 1px 3px 1px #202026;
+    margin : 10px 10px;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+}
+
+.policySettingTopItem{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.policySettingInput{
+    padding: 10px;
+    margin: 0px 5px;
+    background: none;
+    margin-top: 7px;
+    border: 1px solid #8a8aac;
+}
+
+.policySettingLeft{
+        // width: 350px;
+    flex: 1;
+    background-color: #202026;
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 1px 1px 3px 1px #202026;
+    margin : 5px 5px;
+    padding: 15px;
+    border-radius: 5px;
+
+}
+
+.policySettingRight{
+    // width: 350px;
+    flex: 1;
+    background-color: #202026;
+    border-radius: 5px;
+    height: 400px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 1px 1px 3px 1px #202026;
+    margin : 5px 5px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.policySettingRightItemContainer{
+    display: flex;
+    align-items: center;
+}
+
+.policySettingRightCheckbox{
+    width:20px;
+    height:20px;
+    margin-right: 7px;
+    cursor: pointer;
+    
+}
+.policySettingRightItem{
+
+}
+
+.policySettingTableInput{
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid #8a8aac;
+}
+

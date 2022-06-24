@@ -68,3 +68,27 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### My ReadeME
+
+1. 라이브러리 설치
+   npm add @mui/material @emotion/react @emotion/styled
+   npm add recharts
+
+2. 폰트 추가
+   https://fonts.google.com/?query=Source+Sans+Pro
+
+3. 아이콘 추가
+
+npm add @mui/icons-material
+
+https://mui.com/components/material-icons/
+
+4. 박스 쉐도우
+   https://html-css-js.com/css/generator/box-shadow/
+
+5. 테이블
+   npm add @mui/x-data-grid
+
+6. CSS2DRENDER 설치
+   npm i three-css2drender

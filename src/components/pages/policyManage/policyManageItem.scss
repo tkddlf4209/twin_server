@@ -1,0 +1,90 @@
+@import "../../../scss/common.scss";
+
+.policyItem{
+    // width: 350px;
+    // flex: 1;
+    background-color: #202026;
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 1px 1px 3px 1px #202026;
+    margin : 5px 5px;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.policyItemIcon{
+    font-size: 16px !important;
+}
+
+.policyItemImg{
+    width: 350px;
+    height: 250px;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.policyItemHeaderWrapper{
+    margin-bottom: 7px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-content: space-between;
+}
+
+
+.policyItemHeaderLeft{
+}
+
+.policyItemHeaderRight{
+    
+}
+.policyItemContainer{
+    display: flex;
+    flex-direction: column;
+    &.center{
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+
+.plicyItemSettingButton{
+    @include button-color(#3bb077);
+    padding: 3px 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.plicyItemRunButton{
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 0px 0px 5px 5px;
+    border: 0px solid #8a8aac;
+    text-align: center;
+
+    &.start{
+        background: green;
+
+        &:hover{
+            background: lighten(green, 30%);
+        }
+
+        &:active{
+            background: darken(green, 30%);
+        }
+    }
+
+    &.stop{
+        background: red;
+        &:hover{
+            background: lighten(red, 30%);
+        }
+
+        &:active{
+            background: darken(red, 30%);
+        }
+    }
+}

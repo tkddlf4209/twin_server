@@ -1,0 +1,50 @@
+@import "../../../scss/common.scss";
+
+.dashboard{
+    flex:1;
+}
+
+.dashboard_chart_wrap{
+    margin : 0px 0px;
+}
+
+.dashboard_wrap_item{
+    flex: 1;
+    background-color: #202026;
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 1px 1px 3px 1px #202026;
+    margin : 0px 5px;
+    padding: 7px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard_wrap {
+    margin: 5px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    &.top{
+        /* height: 1000px; */
+    }
+    /* border-radius: 5px;
+    -webkit-box-shadow: 2px 2px 5px 1px #202026;
+    box-shadow: 2px 2px 5px 1px #202026; */
+}
+
+.dashboard_fg_cover{
+    position: absolute;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.dashboard_fg_cover_btn{
+    @include button-color(#3bb077);
+    margin: 5px 0 0 5px;
+    font-size: 16px;
+    font-weight: 600;
+}
