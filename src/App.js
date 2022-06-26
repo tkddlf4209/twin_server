@@ -9,6 +9,7 @@ import UserList from './components/pages/userList/UserList'
 import User from './components/pages/user/User'
 import NewUser from './components/pages/newUser/NewUser'
 import WebSocket from './components/socket/WebSocket'
+import TwinManage from './components/pages/twinManage/TwinManage'
 import PolicyManage from './components/pages/policyManage/PolicyManage'
 import PolicySetting from './components/pages/policyManage/PolicySetting'
 import { UsersProvider } from './UsersContext';
@@ -38,6 +39,8 @@ function App() {
                 // </React.Suspense>
               }
               />
+              
+              <Route path="/twinManage" element={<TwinManage />} />
               <Route path="/home" element={<Home />} />
               <Route path="/UserList" element={<UserList />} />
               <Route path="/user/:userId" element={<User />} />

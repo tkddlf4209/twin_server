@@ -1,28 +1,25 @@
 import React, { useEffect,useState } from 'react';
-import { useUsersState, useUsersDispatch, getTwin } from '../../../UsersContext';
 import {useInterval} from '../../../utils'
+import useAsync from '../../../useAsync'
+import {getTwin} from '../../../api'
 
 import ReactJson from 'react-json-view'
 function DashboardJsonTwinView({ id ,interval =3000}) {
-  const state = useUsersState();
-  const dispatch = useUsersDispatch();
 
-  useEffect(()=>{
-    getTwin(dispatch, id);
-  },[id]);
-  
+  const [state, refetch] = useAsync(()=>getTwin(id), [id]);
+  const { loading, data, error } = state; // state.data 를 users 키워드로 조회
+
   useInterval(()=>{
-    getTwin(dispatch, id);
+    refetch();
   },interval)
-
-  const { data: twin, loading, error } = state.twin;
 
   if (loading) return <div>로딩중..</div>;
   if (error) return <div>Load Fail Twin ID : {id}</div>;
-  if (!twin) return <div>Twin Info empty : {id}</div>;
+  if (!data) return <div>Twin Info empty : {id}</div>;
   return (
     <ReactJson 
-    src={twin} 
+    theme="solarized" //monokai
+    src={data} 
     name={id} 
     indentWidth={2}
     iconStyle={"triangle"} // "circle", triangle" or "square".

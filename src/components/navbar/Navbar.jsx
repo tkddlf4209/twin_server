@@ -27,21 +27,21 @@ export default function navbar(){
                         </li>
                     </NavLink >
                    
-                    <NavLink  to="/userList" className={({isActive})=>
+                    <NavLink  to="/twinManage" className={({isActive})=>
                        isActive?"navbarListItemActive":"navbarListItem"
                     }>
                         <li >
-                            <TrendingUpIcon className='navbarIcon'/> UserList
+                            <MonetizationOnIcon className='navbarIcon'/> 트윈관리
                         </li>
                     </NavLink >
-                    <NavLink  to="/home" className={({isActive})=>
+                    {/* <NavLink  to="/home" className={({isActive})=>
                        isActive?"navbarListItemActive":"navbarListItem"
                     }>
                         <li >
                             <MonetizationOnIcon className='navbarIcon'/>
                             Home
                         </li>
-                    </NavLink >
+                    </NavLink > */}
                 </ul>
             </div>
 

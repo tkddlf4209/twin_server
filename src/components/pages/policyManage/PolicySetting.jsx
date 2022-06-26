@@ -1,92 +1,144 @@
-import React, { useRef, useState , useMemo,useEffect } from 'react';
+import React, { useRef, useState ,useCallback, useMemo,useEffect } from 'react';
 import './policySetting.scss'
-import {Link,useParams,useLocation} from 'react-router-dom';
+import {Link,useparam,useLocation, useNavigate} from 'react-router-dom';
 
 import {DataGrid} from '@mui/x-data-grid'
-import { useUsersState, useUsersDispatch, getAllInfos} from '../../../UsersContext';
-import {PermIdentity,CalendarToday,PhoneIphone,MailOutline,LocationOn,Publish} from '@mui/icons-material';
-
-let init =false;
+import useAsync from '../../../useAsync'
+import {getAllInfos, updatePolicy} from '../../../api'
 export default function PolicySetting(){
 
-    //const {plicyId} = useParams();
-    const state = useUsersState();
-    const dispatch = useUsersDispatch();
+    //const {plicyId} = useparam();
+    const [state, refetch] = useAsync(()=>getAllInfos(), []);
+    const { loading, data, error } = state; // state.data 를 users 키워드로 조회
 
-    useEffect(()=>{
-        getAllInfos(dispatch);
-    },[]);
-    
-    const { data: allInfos, loading, error } = state.allInfos;
-
+    //const { event_logs} = state;
+    const navigate = useNavigate();
     const location = useLocation();
-    const initPolicy = location.state?.policy;
-
+    const initPolicy = location.state?.policy; // 외부 주입된 정책정보
     const [policy, setPolicy] = useState(initPolicy);
-    const [relationTwins, setRelationTwins] = useState(initPolicy.relation_twins);
+    const [twinId, setTwinId] = useState(null);
 
-    const [selectTwinProps, setSelectTwinProps] = useState([]);
-    //const [twinInfos, setTwinInfos] = useState(null);
-    const [entityInfos, setEntityInfos] = useState(null);
-    const [props, setProps] = useState( [
-        {id : 0, name : "미세먼지", value :10 , target_value : 20},
-        {id : 1, name : "이상화탄소", value :20 , target_value : 30},
-    ]);
-
-    let { twin_infos , entity_infos } = (allInfos?allInfos:{twin_infos:{},entity_infos:{}});
-
-    // if(allInfos){
-    //     console.log('tt',twin_infos);
-    //     if(init===false){
-    //         setTwinInfos(twin_infos);
-    //         setEntityInfos(entity_infos);
-    //         init =true;
-    //     }
-    // }
 
     const getTwinList = useMemo(()  =>{
         var list = [];
-
-        if(twin_infos){
-            for (const [id, twin] of Object.entries(twin_infos)) {
-                list.push(twin);   
+        if(data){
+            for (const [id, twin] of Object.entries(data.twin_infos)) {
+                list.push(twin); 
             }
         }
-       
         return list;
+    },[data]);
 
-    },[]);
+    const getPropList = useCallback((twin_id)  =>{
+        var list = [];
+        // {id : 0, name : "미세먼지", value :10 , target_value : 20},
+        if(data){
+            console.log(data.entity_infos);
+            for (let [id, entity] of Object.entries(data.entity_infos)) {
+                if(entity.source_id == twin_id){
+                   
+                    entity.props.forEach(prop => {
+                        var target_value = policy.targetProps.filter(p => p.id ===prop.id && p.target_value != null)
+                        
+                        var item = {
+                            ...prop,
+                            twinId : twin_id,
+                            entityId: entity.id,
+                            entityName : entity.name, // 객체 이름,
+                            entityType : entity.type, // 객체 타입 
+                            target_value : (target_value.length>0?target_value[0].target_value:null)
+                        }
+                        list.push(item);
+                    });
+                }
+            }
+        }
+        return list;
+    },[data]);
 
+    // policy  ******
+    const getRelationTwinIds = useMemo(()  =>{
+        return policy.twinIds;
+    },[policy]);
+
+    const getRelationTargetPropIds = useMemo(()  =>{
+        return policy.targetProps.map(prop=> prop.id);
+    },[policy]);
 
     const twin_select_columns = [
-        { field: "id", headerName: "Id", width: 150 , hide:true},
-        { field: "name", headerName: "name", width: 150 },
-        { field: "status", headerName: "Status", width: 100,
-        renderCell : (params) =>{
+        { field: "id", headerName: "", width: 20 ,renderCell : (param) =>{
             return (
                 <>
-                    <p style={params.row.status==="connect"?{color:"green"}:{color:"red"}}>{params.row.status}</p>
+                    <input type="checkbox" checked={policy.twinIds.includes(param.row.id)} onChange={(e)=>{
+                        
+                        if(e.target.checked && param.row.status !== "connect"){
+                            alert("연결되어있지 않습니다")
+                            return;
+                        }
+
+                        if(e.target.checked){
+                            if(!policy.twinIds.includes(param.row.id)){
+                                setPolicy({
+                                    ...policy,
+                                    twinIds : [...policy.twinIds,param.row.id]
+                                })
+                                setTwinId(param.row.id)
+                            }
+                        }else{
+                            setPolicy({
+                                ...policy,
+                                twinIds : policy.twinIds.filter((twin_id)=> twin_id !==param.row.id)
+                            })
+
+                            setTwinId(null)
+                        }
+                    
+                    }} />
+                </>
+            )
+        }}, 
+        { field: "name", headerName: "name", width: 150 },
+        { field: "status", headerName: "Status", width: 100,
+        renderCell : (param) =>{
+            return (
+                <>
+                    <p style={param.row.status==="connect"?{color:"green"}:{color:"red"}}>{param.row.status}</p>
                 </>
             )
         }},
         { field: "tag", headerName: "tag", width: 150 }
     ];
     
-    const policy_target_select_columns = [
-        { field: "id", headerName: "Id", width: 150 , hide:true},
-        { field: "name", headerName: "name", width: 150 },
-        { field: "value", headerName: "value", width: 100,editable: true,type: 'number',
-        renderCell : (param) =>{
-            var selected = selectTwinProps.some((id)=>param.row.id===id);
+    const prop_select_columns = [
+        { field: "id", headerName: "", width: 50 ,renderCell : (param) =>{
             return (
                 <>
-                    <p >{selected?param.row.value:''}</p>
+                    <input type="checkbox" checked={policy.targetProps.some(prop=> prop.id ===param.row.id)?true:false} onChange={(e)=>{
+                        
+                         if(e.target.checked){
+                             // 추가되어있지 않으면 추가
+                             if(!policy.targetProps.some(prop=> prop.id ===param.row.id)){
+                                param.row.target_value = param.row.value;
+
+                                policy.targetProps.push(param.row)
+                                
+                                setPolicy({...policy})
+                             }
+                         }else{
+                            policy.targetProps = policy.targetProps.filter(prop => prop.id !==param.row.id);
+                            setPolicy({...policy})
+                         }
+                    }} />
                 </>
             )
         }},
+        { field: "entityName", headerName: "entityName", width: 150 },
+        { field: "entityType", headerName: "entityType", width: 150 },
+        { field: "prop_id", headerName: "propId", width: 150 },
+        { field: "name", headerName: "name", width: 150 },
         { field: "target_value", headerName: "target_value", width: 150 ,editable: true,type: 'number',
         renderCell : (param) =>{
-            var selected = selectTwinProps.some((id)=>param.row.id===id);
+            var selected = policy.targetProps?.some((prop)=>param.row.id===prop.id);
             return (
                 <>
                     <p >{selected?param.row.target_value:''}</p>
@@ -94,13 +146,23 @@ export default function PolicySetting(){
             )
         }}
     ];
-    
 
     return (
         <div className='policySetting'>
 
             <div className='policySettingWrap center'>
-                <h1 style={{flex:1}} >Policy Setting</h1>  <p className='policySettingSaveButton outline'>SAVE</p>
+                <h1 style={{flex:1}} >Policy Setting</h1> 
+                <p className='policySettingSaveButton outline' onClick={async (e)=>{
+                    var response = await updatePolicy({
+                        type : "POLICY_UPDATE",
+                        data : policy
+                    });
+                    console.log('response',response);
+                    if(response.message){
+                        alert(response.message)
+                    }
+                    navigate(-1)
+                }}>SAVE</p>
             </div>
             <div className='policySettingTop'>
                 <div className='policySettingTopItem'>
@@ -122,44 +184,54 @@ export default function PolicySetting(){
                    Select Relation Twins
                    <DataGrid
                         rows={getTwinList}
+                        
                         columns = {twin_select_columns}
                         pageSize = {20}
-                        checkboxSelection
+                        // checkboxSelection
                         hideFooter
-                        disableSelectionOnClick
-                        selectionModel={relationTwins}
+                        // disableSelectionOnClick
+                        // selectionModel={getRelationTwinIds}
                         onRowClick={(param)=>{
                             //nodeFocusTableHandler(param.row);
                             //console.log(JSON.stringify(param.row));
                         }}
                         onSelectionModelChange ={(ids)=>{
-                            setRelationTwins(ids)
+                            setPolicy((policy)=>{
+                                return {...policy,twinids:ids}
+                            })
+                            setTwinId(ids[0])
                             // setTwinSelectId(ids[0]);
                         }}
                     />
 
                 </div>
                 <div className='policySettingRight'>
-                    Target Value Setting
+                    Props {data?.twin_infos[twinId]?.name}
                     <DataGrid
-                        rows={props}
-                        columns = {policy_target_select_columns}
+                        rows={getPropList(twinId)}
+                        columns = {prop_select_columns}
                         // pageSize = {20}
-                        pagination={false}
-                        checkboxSelection
+                        // checkboxSelection
+                        checkboxSelection={false}
                         hideFooter
                         disableSelectionOnClick
-                        selectionModel={selectTwinProps}
                         onRowClick={(param)=>{
                             //nodeFocusTableHandler(param.row);
                             //console.log(JSON.stringify(param.row));
                         }}
+                        
                         isCellEditable={(param) => {
-                            // 체크 박스가 선택된 프로퍼티만 수정가능
-                            return selectTwinProps.some((id)=>param.row.id===id);
+                            return policy.targetProps.some(prop=> prop.id ===param.row.id);
                         }}
-                        onSelectionModelChange ={(ids)=>{
-                            setSelectTwinProps(ids)
+
+                        onCellEditCommit={(param)=>{
+                            policy.targetProps.forEach(prop => {
+                               if(prop.id ===param.id){
+                                   console.log(prop.id,param.id);
+                                   prop.target_value = param.value;
+                               }
+                            });
+                            setPolicy({...policy})
                         }}
                     />
                    

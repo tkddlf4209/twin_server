@@ -178,7 +178,7 @@ export default React.memo(function Dashboard(){
         }else{
             return [];
         }
-    },[twinSelectId]);
+    },[twinSelectId,twin_infos]);
 
     // useEffect(() => {
     //     getTwins(dispatch);

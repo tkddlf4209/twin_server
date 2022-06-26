@@ -14,7 +14,7 @@ export async function getUser(id) {
     return response.data;
 }
 
-export async function getTwins(id) {
+export async function getTwin(id) {
     const response = await axios.get(
         `http://localhost:4000/twin/${id}`
     );
@@ -42,6 +42,23 @@ export async function removeTwin(data) {
 export async function getAllInfos() {
     const response = await axios.get(
         'http://localhost:4000/allInfos'
+    );
+
+    return response.data;
+}
+
+
+export async function getPlicyInfos() {
+    const response = await axios.get(
+        'http://localhost:4000/policyInfos'
+    );
+
+    return response.data;
+}
+
+export async function updatePolicy(data) {
+    const response = await axios.put(
+        'http://localhost:4000/policyUpdate',data
     );
     return response.data;
 }

@@ -1,11 +1,9 @@
 import React, { useRef, useState } from 'react';
 import './policyManage.scss'
-import {Link} from 'react-router-dom';
 import PolicyManageItem from './PolicyManageItem';
 import {DataGrid} from '@mui/x-data-grid'
-
-import { useUsersState, useUsersDispatch} from '../../../UsersContext';
-import {PermIdentity,CalendarToday,PhoneIphone,MailOutline,LocationOn,Publish} from '@mui/icons-material';
+import useAsync from '../../../useAsync'
+import {getPlicyInfos} from '../../../api'
 
 const log_columns = [
     { field: "id", headerName: "Id", width: 150 },
@@ -21,27 +19,23 @@ const log_columns = [
     }}
 ];
 
-
 export default function PolicyManage(){
 
-    const state = useUsersState();
-    const dispatch = useUsersDispatch();
-    const { policy_infos } = state; 
-
+       //const {plicyId} = useParams();
+    const [state, refetch] = useAsync(()=>getPlicyInfos(), []);
+    const { loading, data, error } = state; // state.data 를 users 키워드로 조회
 
     return (
         <div className='policy'>
             <h1 >Policy Management</h1>
             <div className='policyContainer'>
-                {Object.keys(policy_infos).map((key, idx)=> {
-                    var policy = policy_infos[key];
-                     return  <PolicyManageItem policy={policy}/>
-                    })}
-               
-                {/* <PolicyManageItem data={{title:"재난상황", poilcy_id :2}}/> */}
+                {data?Object.keys(data).map((key, idx)=> {
+                    var policy = data[key];
+                     return  <PolicyManageItem policy={policy} refetch={refetch}/>
+                }):""}
             </div> 
             
-            <div className='policyCardBackgound' style={{height:600,marginTop:7}}>
+            {/* <div className='policyCardBackgound' style={{height:600,marginTop:7}}>
                     EventLog
                     <DataGrid
                         rows={[{id:0}]}
@@ -56,7 +50,7 @@ export default function PolicyManage(){
                            // setTwinSelectId(ids[0]);
                         }}
                     />
-            </div>
+            </div> */}
         </div>
     )
 }

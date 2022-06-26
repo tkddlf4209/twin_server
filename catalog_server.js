@@ -12,29 +12,30 @@ const { default: axios } = require("axios");
 
 const { v4: uuidv4 } = require('uuid');
 const SERVER_PORT = 4000;
-const twin_infos = {} // 모든 트윈 정보 저장
-const entity_infos = {} // 모든 트윈의 엔티티 정보 저장 key : 엔티티 아이디
-const policy_infos = {
+let twin_infos = {} // 모든 트윈 정보 저장
+let entity_infos = {} // 모든 트윈의 엔티티 정보 저장 key : 엔티티 아이디
+let policy_infos = {
     1: {
         id: 1,
         title: '미세먼지 계절관리제',
         enable: true, // 시작상태
-        relation_twins: [], // 연합 참여 트윈
         duration: 1000, // 주기
         startTime: "",
-        endTime: ""
+        endTime: "",
+        twinIds: [] ,// 연합 참여 트윈
+        targetProps: [] // 연협 실행 시 타겟 프로퍼티 설정 값 리스트
     },
     2: {
         id: 2,
         title: '재난상황 발생',
         enable: false,
-        relation_twins: [], // 연합 참여 트윈
         duration: 1000, // 주기
         startTime: "",
-        endTime: ""
+        endTime: "",
+        twinIds: [], // 연합 참여 트윈,
+        targetProps: [] // 연협 실행 시 타겟 프로퍼티 설정 값 리스트
     }
 }
-
 
 
 const twin_ids = {};
@@ -119,6 +120,95 @@ async function startServer() {
         }))
     })
 
+    app.get("/policyInfos", function (req, res) {
+        res.send(JSON.stringify(policy_infos))
+    })
+
+    app.put("/policyUpdate",async function (req, res) {
+       var {type,data} = req.body;
+      
+       switch(type){
+            case "POLICY_START":
+                var other_policy_run = Object.keys(policy_infos).map(key => policy_infos[key]).filter(policy => policy.id !== data.id && policy.enable === true)
+                 
+                if(other_policy_run.length==0){
+                    policy_infos = {
+                        ...policy_infos,
+                        [data.id] : {
+                            ...policy_infos[data.id],
+                            enable:true
+                        }
+                    }
+                    res.send(JSON.stringify({
+                        result:"OK"
+                    }))
+                }else{
+                    res.send(JSON.stringify({
+                        error:"다른 정책이 실행 중입니다.\n(정지 후 다시 시도해주세요)"
+                    }))
+                }
+               
+                return;
+            case "POLICY_STOP":
+                policy_infos = {
+                    ...policy_infos,
+                    [data.id] : {
+                        ...policy_infos[data.id],
+                        enable:false
+                    }
+                }
+
+                res.send(JSON.stringify({
+                    result:"OK"
+                }))
+                return;
+            case "POLICY_UPDATE":
+                
+                var twinIds = data.twinIds;
+                var targetProps = data.targetProps;
+                //twinIds: [] ,// 연합 참여 트윈
+                // targetProps: [] // 연협 실행 시 타겟 프로퍼티 설정 값 리스트
+
+                var keys = Object.keys(twin_infos);
+                var success = 0;
+                var fail = 0;
+                for(var i =0 ; i<keys.length;i++){
+                    let twin_info = twin_infos[keys[i]];
+                    try{
+                        if(twinIds.includes(twin_info.id)){
+                            await axios.put(
+                                twin_info.server_url+"/policy",data
+                            );
+                            success++;
+                        }
+                    }catch(e){
+                        fail++;
+
+                        // 실패한 트윈의 정책 정보는 제거한다.
+                        twinIds = twinIds.filter((twinId)=>twinId !==twin_info.id);
+                        targetProps = targetProps.filter((prop)=>prop.twinId !==twin_info.id);
+                    }
+                }
+
+                data.twinIds = twinIds;
+                data.targetProps = targetProps;
+
+                policy_infos = {
+                    ...policy_infos,
+                    [data.id] : data
+                }
+                
+                res.send(JSON.stringify({
+                    result:"OK",
+                    message : `성공 : ${success} / 실패 : ${fail}`
+                }))
+
+                return;
+       }
+       res.send(JSON.stringify({
+            result:"OK"
+       }))
+    })
 
     server.listen(SERVER_PORT, async function () {
         console.log(`application is listening on port@ ${SERVER_PORT}...`);
@@ -130,7 +220,6 @@ async function startServer() {
         //console.log(socket.handshake.headers);
         if (socket.handshake.headers.twin_id) {
             // 트윈 소켓 연결
-
 
             // 트윈 ID 주입
             socket.twin_id = socket.handshake.headers.twin_id;
@@ -191,6 +280,18 @@ async function startServer() {
 
                 if (twin_infos[socket.twin_id]) {
                     twin_infos[socket.twin_id].status = "disconnect"
+
+                    twin_infos[socket.twin_id].entities = [];
+
+                    Object.keys(entity_infos).forEach(key =>{
+                        var entity = entity_infos[key];
+                        if(entity.source_id === socket.twin_id){
+                            delete entity_infos[key];
+                        }
+                    })
+
+                    policy_infos[1].targetProps = policy_infos[1].targetProps.filter(prop=>prop.twinId !== socket.twin_id);
+                    policy_infos[2].targetProps = policy_infos[2].targetProps.filter(prop=>prop.twinId !== socket.twin_id);
 
                     sendMessage(JSON.stringify({
                         type: "TWIN_DISCONNECT",
