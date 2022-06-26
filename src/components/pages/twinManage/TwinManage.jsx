@@ -20,9 +20,15 @@ const twin_columns = [
     renderCell : (params) =>{
         return (
             <>
-                <DeleteOutline  onClick={()=>API.removeTwin({
-                    data :params.row
-                })}/> 
+                <DeleteOutline  onClick={async ()=> {
+                    try{
+                        await API.removeTwin({
+                            data :params.row
+                        })
+                    }catch(e){
+                        alert(e.message)
+                    }
+                }}/> 
             </>
         )
     } }
