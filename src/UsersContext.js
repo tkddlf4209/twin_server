@@ -17,10 +17,10 @@ const initialState = {
     twin: initialAsyncState,
     entity: initialAsyncState,
 
-
     //web socket data
     twin_infos: {},
-    event_logs: []
+    event_logs: [],
+    socket_status :'disconnect'
 };
 
 const usersHandler = createAsyncHandler('GET_USERS', 'users');
@@ -83,7 +83,7 @@ function usersReducer(state, action) { // 2
                     }
 
                 case "ENTITY_ADD": // 엔티티 추가
-                    console.log('ENTITY_ADD',data);
+                    //console.log('ENTITY_ADD',data);
                     state.twin_infos[data.source_id]?.entities.push(data);
                     return {
                         ...state,
@@ -99,7 +99,6 @@ function usersReducer(state, action) { // 2
                         twin_infos: { ...state.twin_infos },
                         event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
                     }
-
                 // case "ENTITY_ADD":
                 //     var source_id = data.source_id;
                 //     return {

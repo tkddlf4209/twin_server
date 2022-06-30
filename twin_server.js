@@ -288,7 +288,7 @@ function startReadline() {
                             twin_info.entities.push(add_entity)
                             entity_info_list.push(add_entity)
 
-                            console.log('entity_add',add_entity);
+                            //console.log('entity_add',add_entity);
                             socket.emit("entity_add", {
                                 entity: add_entity
                             })
@@ -427,11 +427,9 @@ function startServer(){
     app.put("/policy", function (req, res) {
         const body = req.body;
         
-        console.log("정책등록 수신 및 수락",JSON.stringify(body));
+        console.log("정책등록 수신 및 수락");
         res.send("OK")
-
     })
-
 
     server.listen(SERVER_PORT, async function () {
         console.log(`application is listening on port@ ${SERVER_PORT}...`);

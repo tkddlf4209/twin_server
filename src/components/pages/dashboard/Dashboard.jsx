@@ -1,5 +1,5 @@
 import React , {useState, useEffect,useMemo , useCallback,useRef}from 'react'
-import { ForceGraph3D } from 'react-force-graph';
+import { ForceGraph2D  } from 'react-force-graph';
 import "./dashboard.scss"
 import {DataGrid} from '@mui/x-data-grid'
 import {
@@ -86,11 +86,14 @@ export default React.memo(function Dashboard(){
             ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
             : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
 
-        fgRef.current.cameraPosition(
-            newPos, // new position
-            node, // lookAt ({ x, y, z })
-            2000  // ms transition duration
-        );
+        // fgRef.current.cameraPosition(
+        //     newPos, // new position
+        //     node, // lookAt ({ x, y, z })
+        //     2000  // ms transition duration
+        // );
+
+        fgRef.current.zoom(3.5, 400);
+        fgRef.current.centerAt(node.x, node.y, 400);
         setLatestSelectId(
             {
                 id:node.id,
@@ -114,11 +117,14 @@ export default React.memo(function Dashboard(){
                 ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
                 : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
 
-            fgRef.current.cameraPosition(
-                newPos, // new position
-                node, // lookAt ({ x, y, z })
-                2000  // ms transition duration
-            );
+            // fgRef.current.cameraPosition(
+            //     newPos, // new position
+            //     node, // lookAt ({ x, y, z })
+            //     2000  // ms transition duration
+            // );
+
+            fgRef.current.zoom(3.5, 400);
+            fgRef.current.centerAt(node.x, node.y, 400);
         }
 
         setLatestSelectId(
@@ -178,7 +184,11 @@ export default React.memo(function Dashboard(){
         }else{
             return [];
         }
-    },[twinSelectId,twin_infos]);
+    },[twinSelectId]);
+
+    useEffect(() => {
+       // fgRef.current.d3Force("charge").strength(-200);
+    });
 
     // useEffect(() => {
     //     getTwins(dispatch);
@@ -222,12 +232,24 @@ export default React.memo(function Dashboard(){
                     
                 </div>
                 <div className='dashboard_wrap_item'>
-                    <ForceGraph3D 
+                    <ForceGraph2D 
                                 extraRenderers={extraRenderers}
                                 ref={fgRef}
                                 width={1000}
                                 height={900}
                                 graphData={getNodeDatas}
+                                linkColor={(link) => "#555"}
+                                linkDirectionalParticles={4}
+                                linkWidth={(link) => 3}
+                                linkLineDash={(link) => {
+
+                                    let dash = false;
+                                    if(link.source.status === "disconnect" || link.target.status === "disconnect"){
+                                        dash = true
+                                    }
+                                    console.log(link);
+                                    return dash?[2,1]:null;
+                                }}
                                 nodeLabel={"id"}
                                 // nodeAutoColorBy={"group"}
                                 nodeColor={(node)=>{
@@ -250,27 +272,40 @@ export default React.memo(function Dashboard(){
                                 // .nodeColor(d => d.type=="OK" ? '#4caf50' : '#f44336')
                                 linkDirectionalParticles={"value"}
                                 linkDirectionalParticleSpeed={d => d.value * 0.01}
+                               /*  backgroundColor="aliceblue" */
                                 /* linkCurveRotation={"rotation"}
                                 linkCurvature={"curvature"} */
                                 onNodeClick={nodeFocusHandler}
-                                nodeThreeObjectExtend={true}
-                            
-                                nodeThreeObject={(node) => {
+                                nodeCanvasObjectMode={() => "after"}
+                                nodeCanvasObject={(node, ctx, globalScale) => {
                                     if(labelShow){
-                                        const nodeEl = document.createElement("div");
-                                        nodeEl.textContent = node.name;
-                                        nodeEl.style.fontFamily = "Comic Sans MS, Comic Sans";
-                                        nodeEl.style.color = "white";
-                                        nodeEl.style.top = "-35px";
-                                        return new CSS2DObject(nodeEl);
-                                    }else{
-                                        return;
+                                        const nodeLabel = node.name;
+                                        const fontSize = 12 / globalScale;
+                                        ctx.font = `${fontSize}px Sans-Serif`;
+                                        ctx.textAlign = "center";
+                                        ctx.textBaseline = "middle";
+                                        ctx.fillStyle = "white";
+                                        ctx.fillText(nodeLabel, node.x, node.y+ 7);
                                     }
-                            }}
+                                
+                                }}
+                                // nodeThreeObjectExtend={true}
+                                // nodeThreeObject={(node) => {
+                                //     if(labelShow){
+                                //         const nodeEl = document.createElement("div");
+                                //         nodeEl.textContent = node.name;
+                                //         nodeEl.style.fontFamily = "Comic Sans MS, Comic Sans";
+                                //         nodeEl.style.color = "white";
+                                //         nodeEl.style.top = "-35px";
+                                //         return new CSS2DObject(nodeEl);
+                                //     }else{
+                                //         return;
+                                //     }
+                                // }}
                     />
                     <div className='dashboard_fg_cover'>
                         <button  className='dashboard_fg_cover_btn outline' onClick={()=> fgRef.current.zoomToFit(100)}>ZoomOut</button>
-                        <button  className='dashboard_fg_cover_btn outline' onClick={()=> setLabelShow(!labelShow)}>Lable Toggle</button>
+                        <button  className='dashboard_fg_cover_btn outline' onClick={()=> setLabelShow(!labelShow)}>Label Toggle</button>
                         {/* <button  className='dashboard_fg_cover_btn outline' onClick={()=> {
                             var random_id = getRandomInt(1,100000);
 
