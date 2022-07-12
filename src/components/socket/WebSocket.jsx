@@ -3,7 +3,6 @@ import io from "socket.io-client";
 import { useUsersState, useUsersDispatch } from '../../UsersContext';
 
 
-
 export default function WebSocket(){
     const state = useUsersState();
     const dispatch = useUsersDispatch();
@@ -11,8 +10,8 @@ export default function WebSocket(){
     useEffect(()=>{
 
         const socketConnect = () =>{
-            //var url = window.location.origin;   
-            var url = "http://localhost:4000"
+            var url = window.location.origin;   
+            //var url = "http://localhost:2000"
             //const socket = io.connect(ADDRESS);
         
             var socket = io(url, {
@@ -35,7 +34,6 @@ export default function WebSocket(){
             socket.on('message', function (data) {
                 dispatch({ type: 'SOCKET_MESSAGE' ,data: JSON.parse(data)});
             });
-
         }
 
         socketConnect();

@@ -10,17 +10,11 @@ import moment from "moment"
 var log_idx = 0;
 // UsersContext 에서 사용 할 기본 상태
 const initialState = {
-    // rest data
-    users: initialAsyncState,
-    user: initialAsyncState,
-
-    twin: initialAsyncState,
-    entity: initialAsyncState,
-
-    //web socket data
-    twin_infos: {},
-    event_logs: [],
-    socket_status :'disconnect'
+    twin_info: null,
+    entity_info_list: [],
+    policy_info_list: [],
+    simulation_list: [],
+    socket_status: 'disconnect'
 };
 
 const usersHandler = createAsyncHandler('GET_USERS', 'users');
@@ -34,89 +28,65 @@ function timestamp() {
 function usersReducer(state, action) { // 2
 
     switch (action.type) {
-      
-        case 'GET_USERS':
-        case 'GET_USERS_SUCCESS':
-        case 'GET_USERS_ERROR':
-            return usersHandler(state, action);  // 3 결과 처리
-        case 'GET_USER':
-        case 'GET_USER_SUCCESS':
-        case 'GET_USER_ERROR':
-            return userHandler(state, action);
-        case 'SOCKET_STATUS': // 카탈로그 서버와의 연결상태
+        case 'SOCKET_STATUS': // 트윈 서버와의 연결상태
             return {
                 ...state,
                 socket_status: action.socket_status
             };
+
         case 'SOCKET_MESSAGE':
             const type = action.data.type;
             const data = action.data.data;
             //console.log(state.event_logs);
             switch (type) {
-                case "TWIN_INFO": // 전체 트윈 및 엔티티 정보 초기화 (소켓 연결 성공 시 최초 한 번 수신)
+
+                case "TWIN_INIT": // 트윈 정보 추가 및 갱신
+                    console.log(data);
                     return {
                         ...state,
-                        twin_infos: data.twin_infos,
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        twin_info: data.twin_info,
+                        entity_info_list: data.entity_info_list,
+                        policy_info_list: data.policy_info_list,
+                        simulation_list: data.simulation_list
                     }
-                case "TWIN_CONNECT": // 트윈 정보 추가 및 갱신
-                    state.twin_infos[data.id] = data
+                case "TWIN_ENTITY_UPDATE":
+                    let { id } = data;
                     return {
                         ...state,
-                        twin_infos: { ...state.twin_infos },
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        entity_info_list: state.entity_info_list.map(entity => {
+                            if (entity.id === id) {
+                                return data;
+                            } else {
+                                return entity;
+                            }
+                        })
                     }
-                case "TWIN_DISCONNECT": // 트윈 정보 추가 및 갱신
-                    state.twin_infos[data.id] = data
+                case "TWIN_POLICY_UPDATE":
                     return {
                         ...state,
-                        twin_infos: { ...state.twin_infos },
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        policy_info_list: data.policy_info_list
                     }
 
-                case "TWIN_DELETE": // 트윈 삭제
-                    delete state.twin_infos[data.id];
+                case "TWIN_POLICY_START":
                     return {
                         ...state,
-                        twin_infos: { ...state.twin_infos },
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        policy_info_list: data.policy_info_list,
+                        twin_info: data.twin_info
                     }
-
-                case "ENTITY_ADD": // 엔티티 추가
-                    //console.log('ENTITY_ADD',data);
-                    state.twin_infos[data.source_id]?.entities.push(data);
+                case "TWIN_POLICY_STOP":
                     return {
                         ...state,
-                        twin_infos: { ...state.twin_infos },
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        policy_info_list: data.policy_info_list,
+                        twin_info: data.twin_info
                     }
-
-                case "ENTITY_REMOVE": // 엔티티 삭제
-
-                    state.twin_infos[data.source_id].entities = state.twin_infos[data.source_id].entities.filter(en => en.id !== data.id)
+                case "TWIN_SIMULATION_UPDATE":
                     return {
                         ...state,
-                        twin_infos: { ...state.twin_infos },
-                        event_logs: [...state.event_logs, { id: log_idx++, timestamp: timestamp(), type: type, data: data }]
+                        simulation_list: data.simulation_list
                     }
-                // case "ENTITY_ADD":
-                //     var source_id = data.source_id;
-                //     return {
-                //         ...state,
-                //         twin_info: state.twin_info.map(twin => {
-                //             if (twin.id === source_id) {
-                //                 twin.entities.push(data);
-                //             }
-
-                //             return twin;
-
-                //         })
-                //     }
                 default:
                     throw new Error(`Unhanded action type: ${action.type}`);
             }
-
-
         default:
             throw new Error(`Unhanded action type: ${action.type}`);
     }

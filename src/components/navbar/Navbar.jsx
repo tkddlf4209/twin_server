@@ -19,19 +19,27 @@ export default function navbar(){
                             <HomeWorkIcon className='navbarIcon'/> 대시보드
                         </li>
                     </NavLink >
+                    <NavLink  to="/entityManage" className={({isActive})=>
+                       isActive?"navbarListItemActive":"navbarListItem"
+                    }>
+                        <li >
+                            <TrendingUpIcon className='navbarIcon'/> 객체관리
+                        </li>
+                    </NavLink >
+                   
                     <NavLink  to="/policyManage" className={({isActive})=>
                        isActive?"navbarListItemActive":"navbarListItem"
                     }>
                         <li >
-                            <TrendingUpIcon className='navbarIcon'/> 정책관리
+                            <MonetizationOnIcon className='navbarIcon'/> 정책관리
                         </li>
                     </NavLink >
-                   
-                    <NavLink  to="/twinManage" className={({isActive})=>
+
+                    <NavLink  to="/twinInfo" className={({isActive})=>
                        isActive?"navbarListItemActive":"navbarListItem"
                     }>
                         <li >
-                            <MonetizationOnIcon className='navbarIcon'/> 트윈관리
+                            <MonetizationOnIcon className='navbarIcon'/> 트윈정보
                         </li>
                     </NavLink >
                     {/* <NavLink  to="/home" className={({isActive})=>
