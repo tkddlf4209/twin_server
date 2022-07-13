@@ -430,7 +430,7 @@ function stopPolicy() {
         policy_interval = null;
     }
 }
-
+//test
 function calDeviceCount(policy_config) {
     // 계절관리제에서 정책 config의 목표 달성을 위한 장치갯수 값을 산출한다. 최소로 측정한다.
 
