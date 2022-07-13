@@ -141,6 +141,7 @@ function startServer() {
         twinType = Number(twin_type) // 1: 제조 , 2:에너지
 
         twin_info = {
+            status: 'connect',
             id: twinId,
             name: twinName,
             type: twinType,
@@ -240,6 +241,10 @@ function startServer() {
 
             twin_info.policy_info[id] = policy_config;  // 정책 목표 값을 저장한다.
 
+            catalog_server_socket.emit("policy_start", {
+                twin_info: twin_info
+            })
+
             sendMessage(JSON.stringify({
                 type: "TWIN_POLICY_START",
                 data: {
@@ -247,6 +252,8 @@ function startServer() {
                     twin_info: twin_info
                 }
             }))
+
+
             simulationPolicy(policy_info, true);
 
             // catalog_server_socket.emit("twin_info_update", {
@@ -267,6 +274,10 @@ function startServer() {
             if (twin_info && twin_info.policy_info && twin_info.policy_info[id]) {
                 delete twin_info.policy_info[id]
             }
+
+            catalog_server_socket.emit("policy_stop", {
+                twin_info: twin_info
+            })
 
             sendMessage(JSON.stringify({
                 type: "TWIN_POLICY_STOP",
@@ -455,7 +466,9 @@ function calDeviceCount(policy_config) {
 function startPolicy(policy_info) {
 
     const { id, policy_config, duration } = policy_info;
-    console.log('startPolicy', policy_info);
+
+
+
     if (id === 1) { // 계절관리제
         if (twinType === 1) { // 제조 트윈
             let TARGET_VLAUE_DEVICE_COUNT = calDeviceCount(policy_config); // 
@@ -463,7 +476,6 @@ function startPolicy(policy_info) {
                 let target_entity = entity_info_list.find(entity => entity.entity_id === 'process');
                 let target_prop = target_entity.props.find(prop => prop.prop_id === 'device_count');
                 // 프로퍼티 값을 변경한다.
-
 
                 updateProp(target_prop, TARGET_VLAUE_DEVICE_COUNT);
 
@@ -477,7 +489,13 @@ function startPolicy(policy_info) {
                 })
 
                 if (target_prop.value === TARGET_VLAUE_DEVICE_COUNT) {
+                    delete twin_info.policy_info[id];
 
+                    catalog_server_socket.emit("policy_finish", {
+                        twin_info: twin_info,
+                        policy_info: policy_info
+                    })
+                    //stopPolicy();
                 }
 
             }, duration)
